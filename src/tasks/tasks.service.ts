@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { TaskStatus } from './task.model';
 import { CreateTaskDto } from './create-task.dto';
 import { UpdateTaskDto } from './update-task.dto';
@@ -8,6 +8,7 @@ import { Task } from './task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTaskLabelDto } from './create-task-label.dto';
 import { TaskLabel } from './task-label.entity';
+import { FindTaskParams } from './find-task.params';
 
 @Injectable()
 export class TasksService {
@@ -19,9 +20,15 @@ export class TasksService {
     private readonly taskLabelRepository: Repository<TaskLabel>,
   ) {}
 
-  async findAll(relations: string[] = []): Promise<Task[]> {
+  async findAll(filters: FindTaskParams): Promise<Task[]> {
+    const relationsArray = filters.relations
+      ? filters.relations.split(',')
+      : [];
     return await this.tasksRepository.find({
-      relations: relations,
+      relations: relationsArray,
+      where: {
+        status: filters.status,
+      },
     });
   }
 

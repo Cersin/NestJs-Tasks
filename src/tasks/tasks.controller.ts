@@ -19,17 +19,15 @@ import { UpdateTaskDto } from './update-task.dto';
 import { WrongTaskStatusException } from './exceptions/wrong-task-status.exception';
 import { Task } from './task.entity';
 import { CreateTaskLabelDto } from './create-task-label.dto';
+import { FindTaskParams } from './find-task.params';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
-  public async findAll(
-    @Query('relations') relations?: string,
-  ): Promise<Task[]> {
-    const relationsArray = relations ? relations.split(',') : [];
-    return this.tasksService.findAll(relationsArray);
+  public async findAll(@Query() filters: FindTaskParams): Promise<Task[]> {
+    return this.tasksService.findAll(filters);
   }
 
   @Get('/:id')
