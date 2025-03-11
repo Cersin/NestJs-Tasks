@@ -20,14 +20,28 @@ import { WrongTaskStatusException } from './exceptions/wrong-task-status.excepti
 import { Task } from './task.entity';
 import { CreateTaskLabelDto } from './create-task-label.dto';
 import { FindTaskParams } from './find-task.params';
+import { PaginationParams } from '../common/pagination.params';
+import { PaginationResponse } from '../common/pagination.response';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
-  public async findAll(@Query() filters: FindTaskParams): Promise<Task[]> {
-    return this.tasksService.findAll(filters);
+  public async findAll(
+    @Query() filters: FindTaskParams,
+    @Query() pagination: PaginationParams,
+  ): Promise<PaginationResponse<Task>> {
+    const [items, total] = await this.tasksService.findAll(filters, pagination);
+
+    return {
+      data: items,
+      meta: {
+        total,
+        offset: pagination.offset,
+        limit: pagination.limit,
+      },
+    };
   }
 
   @Get('/:id')
