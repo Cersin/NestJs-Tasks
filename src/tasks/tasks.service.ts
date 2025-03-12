@@ -40,6 +40,10 @@ export class TasksService {
         { search: `%${filters.search}%` },
       );
 
+    if (filters.labels?.length) {
+      query.andWhere('labels.name IN (:...names)', { names: filters.labels });
+    }
+
     query.skip(pagination.offset).take(pagination.limit);
 
     return query.getManyAndCount();
