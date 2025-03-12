@@ -1,9 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { TaskStatus } from './task.model';
 import { User } from '../users/users.entity';
@@ -51,4 +53,10 @@ export class Task {
     cascade: true, // can create, modify labels
   })
   labels: TaskLabel[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
