@@ -25,25 +25,45 @@ export class TasksService {
     filters: FindTaskParams,
     pagination: PaginationParams,
   ): Promise<[Task[], number]> {
-    const where: FindOptionsWhere<Task> = {};
+    // approach with query builder
+    const query = this.tasksRepository.createQueryBuilder('task');
 
-    // convert relations to an array
-    const relationsArray = filters.relations
-      ? filters.relations.split(',')
-      : [];
+    if (filters.relations?.includes('labels'))
+      query.leftJoinAndSelect('task.labels', 'labels');
 
-    if (filters.status) where.status = filters.status;
-    if (filters.search?.trim()) {
-      where.title = Like(`%${filters.search}%`);
-      where.description = Like(`%${filters.search}%`);
-    }
+    if (filters.status)
+      query.andWhere('task.status = :status', { status: filters.status });
 
-    return await this.tasksRepository.findAndCount({
-      where: where,
-      relations: relationsArray,
-      skip: pagination.offset,
-      take: pagination.limit,
-    });
+    if (filters.search?.trim())
+      query.andWhere(
+        '(task.title ILIKE :search or task.description ILIKE :search)',
+        { search: `%${filters.search}%` },
+      );
+
+    query.skip(pagination.offset).take(pagination.limit);
+
+    return query.getManyAndCount();
+
+    // a different approach
+    // const where: FindOptionsWhere<Task> = {};
+    //
+    // // convert relations to an array
+    // const relationsArray = filters.relations
+    //   ? filters.relations.split(',')
+    //   : [];
+    //
+    // if (filters.status) where.status = filters.status;
+    // if (filters.search?.trim()) {
+    //   where.title = Like(`%${filters.search}%`);
+    //   where.description = Like(`%${filters.search}%`);
+    // }
+    //
+    // return await this.tasksRepository.findAndCount({
+    //   where: where,
+    //   relations: relationsArray,
+    //   skip: pagination.offset,
+    //   take: pagination.limit,
+    // });
   }
 
   async findOne(id: string): Promise<Task | null> {
