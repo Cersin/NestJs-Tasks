@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../create-user.dto';
 import { User } from '../users.entity';
 import { PasswordService } from '../password/password.service';
+import { LoginDto } from '../login.dto';
 
 @Injectable()
 export class AuthService {
@@ -21,15 +22,16 @@ export class AuthService {
     const existingUser = await this.userService.findOneByEmail(
       createUserDto.email,
     );
-    if (!existingUser) {
+
+    if (existingUser) {
       throw new ConflictException('Email already exists');
     }
 
     await this.userService.createUser(createUserDto);
   }
 
-  public async login(email: string, password: string): Promise<string> {
-    const user = await this.userService.findOneByEmail(email);
+  public async login(loginDto: LoginDto): Promise<string> {
+    const user = await this.userService.findOneByEmail(loginDto.email);
 
     // user not find
     if (!user) {
@@ -37,7 +39,9 @@ export class AuthService {
     }
 
     // provided password invalid
-    if (!(await this.passwordService.verify(password, user.password))) {
+    if (
+      !(await this.passwordService.verify(loginDto.password, user.password))
+    ) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
