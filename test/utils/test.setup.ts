@@ -1,4 +1,8 @@
-import { INestApplication } from '@nestjs/common';
+import {
+  BadRequestException,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
@@ -39,6 +43,22 @@ export class TestSetup {
 
     // create nestjs app
     this.app = moduleFixture.createNestApplication();
+    this.app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        exceptionFactory: (errors) => {
+          throw new BadRequestException({
+            statusCode: 400,
+            message: 'Validation failed',
+            errors: errors.map((error) => ({
+              field: error.property,
+              errors: Object.values(error.constraints || {}),
+            })),
+          });
+        },
+      }),
+    );
     // get db connection
     this.dataSource = moduleFixture.get(DataSource);
     // initialize app (starts server, connects to db etc.)

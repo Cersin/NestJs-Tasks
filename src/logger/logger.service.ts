@@ -6,8 +6,6 @@ export class LoggerService {
   constructor(private readonly messageFormatter: MessageFormatterService) {}
 
   public log(message: string): string {
-    const formattedMessage = this.messageFormatter.format(message);
-    console.log(message);
-    return formattedMessage;
+    return this.messageFormatter.format(message);
   }
 }

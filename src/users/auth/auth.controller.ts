@@ -7,7 +7,6 @@ import {
   Post,
   Request,
   SerializeOptions,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -17,8 +16,10 @@ import { LoginResponse } from '../login.response';
 import { User } from '../users.entity';
 import { AuthRequest } from '../auth.request';
 import { UserService } from '../user/user.service';
-import { AuthGuard } from '../guards/auth.guard';
 import { Public } from '../decorators/public.decorator';
+import { AdminResponse } from '../admin.response';
+import { Role } from '../role.enum';
+import { Roles } from '../decorators/roles.decorator';
 
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -50,5 +51,11 @@ export class AuthController {
     }
 
     throw new NotFoundException();
+  }
+
+  @Get('admin')
+  @Roles(Role.ADMIN)
+  adminOnly(): AdminResponse {
+    return new AdminResponse({ message: 'This is for admins only' });
   }
 }
