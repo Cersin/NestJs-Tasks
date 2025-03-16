@@ -24,10 +24,11 @@ export class UserService {
       createUserDto.password,
     );
 
-    return await this.userRepository.save({
+    const user = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
     });
+    return await this.userRepository.save(user);
   }
 
   // 3) fetch the user by id
