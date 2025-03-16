@@ -51,9 +51,12 @@ describe('Auth (e2e)', () => {
       .post('/auth/register')
       .send(testUser);
 
-    return await request(testSetup.app.getHttpServer())
+    const response = await request(testSetup.app.getHttpServer())
       .post('/auth/login')
       .send(testUser)
-      .expect(200);
+      .expect(201);
+
+    expect(response.status).toBe(201);
+    expect(response.body.accessToken).toBeDefined();
   });
 });

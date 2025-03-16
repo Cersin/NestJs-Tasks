@@ -2,8 +2,6 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  HttpCode,
-  HttpStatus,
   Post,
   SerializeOptions,
   UseInterceptors,
@@ -25,9 +23,8 @@ export class AuthController {
   }
 
   @Post('login')
-  @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponse> {
     const accessToken = await this.authService.login(loginDto);
-    return { accessToken };
+    return new LoginResponse({ accessToken });
   }
 }
