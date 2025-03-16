@@ -24,9 +24,12 @@ export class TasksService {
   async findAll(
     filters: FindTaskParams,
     pagination: PaginationParams,
+    userId: string,
   ): Promise<[Task[], number]> {
     // approach with query builder
-    const query = this.tasksRepository.createQueryBuilder('task');
+    const query = this.tasksRepository
+      .createQueryBuilder('task')
+      .where('task.userId = :userId', { userId });
 
     if (filters.relations?.includes('labels'))
       query.leftJoinAndSelect('task.labels', 'labels');
