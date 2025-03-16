@@ -1,6 +1,11 @@
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { TestSetup } from './utils/test.setup';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from '../src/users/users.entity';
+import { Role } from '../src/users/role.enum';
+import { PasswordService } from '../src/users/password/password.service';
+import { JwtService } from '@nestjs/jwt';
 
 describe('Auth (e2e)', () => {
   let testSetup: TestSetup;
@@ -49,6 +54,29 @@ describe('Auth (e2e)', () => {
     //   expect(res.body.email).toBe(testUser.email);
     //   expect(res.body.name).toBe(testUser.name);
     // });
+  });
+
+  it('should include roles in JWT token', async () => {
+    const userRepo = testSetup.app.get(getRepositoryToken(User));
+
+    await userRepo.save({
+      ...testUser,
+      roles: [Role.ADMIN],
+      password: await testSetup.app
+        .get(PasswordService)
+        .hash(testUser.password),
+    });
+
+    const response = await request(testSetup.app.getHttpServer())
+      .post('/auth/login')
+      .send(testUser);
+
+    const decoded = testSetup.app
+      .get(JwtService)
+      .verify(response.body.accessToken);
+
+    expect(decoded.roles).toBeDefined();
+    expect(decoded.roles).toContain(Role.ADMIN);
   });
 
   it('/auth/register (POST) - duplicate email', async () => {

@@ -8,6 +8,8 @@ import {
 } from 'typeorm';
 import { Task } from '../tasks/task.entity';
 import { Expose } from 'class-transformer';
+import { Role } from './role.enum';
+import { IsEnum } from 'class-validator';
 
 @Entity()
 export class User {
@@ -39,4 +41,9 @@ export class User {
   @OneToMany(() => Task, (task) => task.user)
   @Expose()
   tasks: Task[];
+
+  @Column('text', { array: true, default: [Role.USER] })
+  @IsEnum(Role)
+  @Expose()
+  roles: Role[];
 }
